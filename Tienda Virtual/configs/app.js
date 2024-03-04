@@ -11,6 +11,7 @@ import { config } from "dotenv"
 import userRoutes from '../src/user/user.routes.js'
 import productRoutes from '../src/product/product.routes.js';
 import categoryRoutes from '../src/category/category.routes.js'
+import cartRoutes from '../src/shoppingCart/cart.routes.js'
 
 //Configuraciones
 const app = express()
@@ -25,9 +26,10 @@ app.use(helmet()) //Aplica capa de seguridad básica al servidor
 app.use(morgan('dev')) //Logs de solicitudes al servidor HTTP
 
 //Declaración de rutas
-app.use(userRoutes)
-app.use(productRoutes)
-app.use(categoryRoutes)
+app.use('/user',userRoutes)
+app.use('/product',productRoutes)
+app.use('/category',categoryRoutes)
+app.use('/cart', cartRoutes)
 
 //Levantar el servidor
 export const initServer = ()=>{
