@@ -18,7 +18,7 @@ export const register = async (req, res) => {
         data.password = await encrypt(data.password)
 
         //Asignar el rol por defecto
-        data.role = 'CLIENT'
+        //data.role = 'CLIENT'
 
         //Guardar la información en la DB
         let user = new User(data)

@@ -29,17 +29,27 @@ export const create = async (req, res) => {
             let cart = await Cart.findOne({ user: uid })
 
             if (!cart) {
-                const newCart = newCartEntry(userId, selectedProduct, selectedQuantity) 
-                let total = calculateCartTotal(newCart.products) 
-                newCart.total = total 
-                await saveCart(newCart) 
+                if (!cart) {
+                    let newCart = new Cart({
+                        user: uid,
+                        products: [{ product: product, quantity }],
+                        total: 0  // Inicializamos el total en 0
+                    });
 
-                return res.send({ message: 'Product added to cart successfully.', total }) 
-            }
+                let total = 0;
+                for (let item of newCart.products) {
+                    let productData = await Product.findById(item.product);
+                    if (productData) {
+                        total += productData.price * item.quantity;
+                    }
+                }
+                newCart.total = total;
+                await newCart.save();
+            }}
 
 
             // Miramos si el producto está en el carrito
-            let productIndex = findProductIndexInCart(userCart.products, selectedProduct) 
+            let productIndex = cart.products.findIndex(p => p.product.equals(product)) 
 
             if (productIndex !== -1) {
                 userCart.products[productIndex].quantity += parseInt(selectedQuantity) 
