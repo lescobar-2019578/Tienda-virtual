@@ -14,8 +14,9 @@ const productSchema = Schema({
         required: true
     },
     stock: {
-        type: String,
-        require: true
+        type: Number,
+        require: true,
+        default: 0
     },
     category: {
         type: Schema.Types.ObjectId,  //referencia a un documento de la colección Category

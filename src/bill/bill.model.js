@@ -23,7 +23,7 @@ const billSchema = new Schema({
             }
         }
     ],
-    totalAmount: {
+    total: {
         type: Number,
         required: true
     },

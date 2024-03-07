@@ -2,12 +2,12 @@ import express from 'express'
 
 
 import {
-    testCategory,
+    test,
     getAllCategories, 
     getCategoryById, 
-    createCategory, 
-    updateCategory,
-    deleteCategory
+    create, 
+    update,
+    deleteC
 } from './category.controller.js';
 import { isAdmin, validateJwt } from '../middlewares/validate-jwt.js';
 
@@ -19,10 +19,10 @@ api.get('/getAllCategories', getAllCategories)
 api.get('/getCategory/:id', getCategoryById)
 
 // Rutas privadas protegidas por middleware 
-api.get( '/testCategory', [validateJwt],testCategory); //prueba de conexion al servidor
-api.post('/createCategory', [validateJwt, isAdmin], createCategory)
-api.put('/UptadeCategory/:id',[validateJwt,isAdmin],updateCategory)
-api.delete('/DeleteCategory/:id',[validateJwt,isAdmin],deleteCategory)
+api.get( '/test', [validateJwt],test); //prueba de conexion al servidor
+api.post('/create', [validateJwt, isAdmin], create)
+api.put('/uptade/:id',[validateJwt,isAdmin],update)
+api.delete('/delete/:id',[validateJwt,isAdmin],deleteC)
 
 
 
