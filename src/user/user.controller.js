@@ -147,8 +147,8 @@ export const defaultAdmin = async () => {
             surname: 'Escobar',
             username: 'lescobar',
             email: 'lescobar@kinal.edu.gt',
-            phone: '123456789',
-            password: await encrypt('12345678'),
+            phone: '12345678',
+            password: await encrypt('123456789'),
             role: 'ADMIN'
         }
         let user = new User(data)
