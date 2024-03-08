@@ -17,9 +17,9 @@ const api = express.Router();
 //Rutas publicas 
 api.get('/getAllCategories', getAllCategories)
 api.get('/getCategory/:id', getCategoryById)
+api.get( '/test',test); //prueba de conexion al servidor
 
 // Rutas privadas protegidas por middleware 
-api.get( '/test', [validateJwt],test); //prueba de conexion al servidor
 api.post('/create', [validateJwt, isAdmin], create)
 api.put('/uptade/:id',[validateJwt,isAdmin],update)
 api.delete('/delete/:id',[validateJwt,isAdmin],deleteC)

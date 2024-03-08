@@ -92,11 +92,11 @@ export const deleteC = async (req, res) => {
     }
 } 
 
-export const createDefaultCategory = async () => {
+export const defaultCategory = async () => {
     try {
-        let existingDefaultCategory = await Category.findCategoryByName('Default') 
+        let create = await Category.findOne({name: 'Default'}) 
 
-        if (existingDefaultCategory) {
+        if (create) {
             return  
         }
         let defaultCategoryData = {
@@ -104,10 +104,13 @@ export const createDefaultCategory = async () => {
             description: 'Default category'
         } 
 
-        let defaultCategory = Category.newCategory(defaultCategoryData) 
-        await Category.saveCategory(defaultCategory) 
+        let defaultCategory = new Category(defaultCategoryData) 
+        await defaultCategory.save() 
+        console.log('Category for default created with name is "Default" and description "Default category"')
+
 
     } catch (error) {
         console.error(error) 
     }
 } 
+

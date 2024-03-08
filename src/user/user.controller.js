@@ -25,7 +25,7 @@ export const registerAdmin = async (req, res) => {
         await user.save() //Gardar en la DB
 
         //Responder al usuario
-        return res.send({ message: `Registered client successfully, can be logged with username ${user.username}` })
+        return res.send({ message: `Registered admin successfully, can be logged with username ${user.username}` })
     } catch (err) {
         console.error(err)
         return res.status(500).send({ message: 'Error registering user', err: err })
@@ -48,7 +48,7 @@ export const registerClient= async (req, res) => {
         await user.save() //Gardar en la DB
 
         //Responder al usuario
-        return res.send({ message: `Registered admin successfully, can be logged with username ${user.username}` })
+        return res.send({ message: `Registered client successfully, can be logged with username ${user.username}` })
     } catch (err) {
         console.error(err)
         return res.status(500).send({ message: 'Error registering user', err: err })
@@ -133,5 +133,28 @@ export const deleteU = async (req, res) => {
     } catch (err) {
         console.error(err)
         return res.status(500).send({ message: 'Error deleting account', error: err })
+    }
+}
+
+export const defaultAdmin = async () => {
+    try {
+        const createUser = await User.findOne({ username: 'lescobar' })
+        if (createUser) {
+            return;
+        }
+        let data = {
+            name: 'Llanel',
+            surname: 'Escobar',
+            username: 'lescobar',
+            email: 'lescobar@kinal.edu.gt',
+            phone: '123456789',
+            password: await encrypt('12345678'),
+            role: 'ADMIN'
+        }
+        let user = new User(data)
+        await user.save()
+        console.log('Admin for default created with username "lescobar" and password "123456789"')
+    } catch (error) {
+        console.error(error)
     }
 }

@@ -16,10 +16,10 @@ export const test = (req, res) => {
 
 export const create = async (req, res) => {
     try {
-        const { product, quantity, buyComplete } = req.body 
-        const uid = req.user._id 
+        let { product, quantity, buyComplete } = req.body 
+        let uid = req.user._id 
 
-        const productData = await Product.findById(product) 
+        let productData = await Product.findById(product) 
         if (!productData || productData.stock === 0 || quantity > productData.stock) {
             return res.status(400).send({ message: 'There is insufficient stock for this product.' }) 
         }
@@ -28,7 +28,7 @@ export const create = async (req, res) => {
             let cart = await Cart.findOne({ user: uid }) 
 
             if (!cart) {
-                const newCart = new Cart({
+                let newCart = new Cart({
                     user: uid,
                     products: [{ product: product, quantity }],
                     total: 0
@@ -46,7 +46,7 @@ export const create = async (req, res) => {
                 return res.send({ message: 'Product added to cart successfully.', total }) 
             }
 
-            const productIndex = cart.products.findIndex(p => p.product.equals(product)) 
+            let productIndex = cart.products.findIndex(p => p.product.equals(product)) 
 
             if (productIndex !== -1) {
                 cart.products[productIndex].quantity += parseInt(quantity) 
@@ -55,8 +55,8 @@ export const create = async (req, res) => {
             }
 
             let total = 0 
-            for (const item of cart.products) {
-                const productData = await Product.findById(item.product) 
+            for (let item of cart.products) {
+                let productData = await Product.findById(item.product) 
                 if (productData) {
                     total += productData.price * item.quantity 
                 }
@@ -94,8 +94,8 @@ export const create = async (req, res) => {
             }) 
             let savedBill = await bill.save() 
             
-            for (const item of cart.products) {
-                const productData = await Product.findById(item.product) 
+            for (let item of cart.products) {
+                let productData = await Product.findById(item.product) 
                 if (productData) {
                     productData.stock -= item.quantity 
                     await productData.save() 
@@ -119,11 +119,11 @@ export const create = async (req, res) => {
 export const generateBillPDF = async (bill) => {
     return new Promise((resolve, reject) => {
         try {
-            const doc = new PDF()  // Crear un nuevo documento PDF
-            const __filename = fileURLToPath(import.meta.url) 
-            const currentDir = dirname(__filename) 
-            const billsDir = join(currentDir, '..', 'bill')  // Directorio donde se guardarán las facturas
-            const pdfPath = join(billsDir, `InvoiceNo.${bill._id}.pdf`)  // Ruta del archivo PDF
+            let doc = new PDF()  // Crear un nuevo documento PDF
+            let __filename = fileURLToPath(import.meta.url) 
+            let currentDir = dirname(__filename) 
+            let billsDir = join(currentDir, '..', 'bill')  // Directorio donde se guardarán las facturas
+            let pdfPath = join(billsDir, `InvoiceNo.${bill._id}.pdf`)  // Ruta del archivo PDF
 
             // Te aseguras de que el directorio de facturas exista
             if (!fs.existsSync(billsDir)) {
