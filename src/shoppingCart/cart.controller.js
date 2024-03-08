@@ -125,7 +125,7 @@ export const generateBillPDF = async (bill) => {
             const billsDir = join(currentDir, '..', 'bill')  // Directorio donde se guardarán las facturas
             const pdfPath = join(billsDir, `InvoiceNo.${bill._id}.pdf`)  // Ruta del archivo PDF
 
-            // Asegúrate de que el directorio de facturas exista
+            // Te aseguras de que el directorio de facturas exista
             if (!fs.existsSync(billsDir)) {
                 fs.mkdirSync(billsDir, { recursive: true }) 
             }
@@ -155,14 +155,14 @@ export const generateBillPDF = async (bill) => {
 
             stream.on('finish', () => {
                 console.log(`PDF generated at: ${pdfPath}`) 
-                resolve(pdfPath)  // Resolución de la promesa con la ruta del archivo PDF generado
+                resolve(pdfPath) 
             }) 
 
             stream.on('error', (err) => {
-                reject(err)  // Rechazo de la promesa en caso de error
+                reject(err)  
             }) 
         } catch (error) {
-            reject(error)  // Captura de errores y rechazo de la promesa
+            reject(error)  
         }
     }) 
 }
