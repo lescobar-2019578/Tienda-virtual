@@ -15,7 +15,7 @@ export const getAllProducts = async (req, res) => {
     let products = await Product.find().populate('category') 
     res.send(products) 
   } catch (error) {
-    res.status(500).send({ error: 'they can not be seen the products' }) 
+    res.status(500).send({ error: 'They can not be seen the products' }) 
   }
 }
 
@@ -40,9 +40,9 @@ export const createProduct = async (req, res) => {
     if (!category) return res.status(404).send({ message: "Category does not exist" })
     let newProduct = new Product(data) 
     await newProduct.save() 
-    return res.send({ message: `You just added ${newProduct.name} to the store!` }) 
+    return res.send({ message: `You just add ${newProduct.name}` }) 
   } catch (error) {
-    res.status(500).send({ error: 'could not be added product' }) 
+    res.status(500).send({ error: 'could not be add product' }) 
   }
 }
 
@@ -91,13 +91,10 @@ export const getTopSellingProducts = async (req, res) => {
   try {
     let allProducts = await Product.find();
 
-    // Ordenar los productos por cantidad vendida de forma descendente
     allProducts.sort((a, b) => b.totalQuantitySold - a.totalQuantitySold);
 
-    // Tomar los primeros 10 productos de la lista ordenada
     let topSellingProducts = allProducts.slice(0, 10);
 
-    // Retornar los detalles de los productos más vendidos
     return res.send(topSellingProducts); 
   } catch (err) {
       console.error(err) 

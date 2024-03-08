@@ -94,7 +94,7 @@ export const deleteC = async (req, res) => {
 
 export const createDefaultCategory = async () => {
     try {
-        const existingDefaultCategory = await Category.findCategoryByName('Default') 
+        let existingDefaultCategory = await Category.findCategoryByName('Default') 
 
         if (existingDefaultCategory) {
             return  

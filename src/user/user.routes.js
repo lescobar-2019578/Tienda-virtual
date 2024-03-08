@@ -5,7 +5,8 @@ import {
 } from '../middlewares/validate-jwt.js';
 import {
     test,
-    register, 
+    registerAdmin, 
+    registerClient,
     login, 
     update, 
     deleteU
@@ -14,7 +15,8 @@ import {
 const api = express.Router();
 
 //RUTAS PÚBLICAS
-api.post('/register', register)
+api.post('/registerAdmin', registerAdmin)
+api.post('/registerClient', registerClient)
 api.post('/login', login)
 
 //RUTAS PRIVADAS (solo usuarios logeados)

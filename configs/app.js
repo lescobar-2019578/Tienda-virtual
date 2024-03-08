@@ -12,6 +12,7 @@ import userRoutes from '../src/user/user.routes.js'
 import productRoutes from '../src/product/product.routes.js';
 import categoryRoutes from '../src/category/category.routes.js'
 import cartRoutes from '../src/shoppingCart/cart.routes.js'
+import billRoutes from '../src/bill/bill.routes.js'
 
 //Configuraciones
 const app = express()
@@ -30,6 +31,8 @@ app.use('/user',userRoutes)
 app.use('/product',productRoutes)
 app.use('/category',categoryRoutes)
 app.use('/cart', cartRoutes)
+app.use('/bill', billRoutes)
+
 
 //Levantar el servidor
 export const initServer = ()=>{

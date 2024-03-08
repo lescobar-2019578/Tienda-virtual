@@ -9,7 +9,7 @@ export const test = (req, res) => {
     return res.send({ message: 'Test is running' })
 }
 
-export const register = async (req, res) => {
+export const registerAdmin = async (req, res) => {
     try {
         //Capturar el formulario (body)
         let data = req.body
@@ -18,20 +18,42 @@ export const register = async (req, res) => {
         data.password = await encrypt(data.password)
 
         //Asignar el rol por defecto
-        //data.role = 'CLIENT'
+        data.role = 'ADMIN'
 
         //Guardar la información en la DB
         let user = new User(data)
         await user.save() //Gardar en la DB
 
         //Responder al usuario
-        return res.send({ message: `Registered student successfully, can be logged with username ${user.username}` })
+        return res.send({ message: `Registered client successfully, can be logged with username ${user.username}` })
     } catch (err) {
         console.error(err)
         return res.status(500).send({ message: 'Error registering user', err: err })
     }
 }
 
+export const registerClient= async (req, res) => {
+    try {
+        //Capturar el formulario (body)
+        let data = req.body
+
+        //Encriptar la contraseña
+        data.password = await encrypt(data.password)
+
+        //Asignar el rol por defecto
+        data.role = 'CLIENT'
+
+        //Guardar la información en la DB
+        let user = new User(data)
+        await user.save() //Gardar en la DB
+
+        //Responder al usuario
+        return res.send({ message: `Registered admin successfully, can be logged with username ${user.username}` })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).send({ message: 'Error registering user', err: err })
+    }
+}
 
 export const login = async (req, res) => {
     try {
@@ -81,7 +103,6 @@ export const update = async (req, res) => { //Datos generales (No password)
         //Validar si data trae datos
         let update = checkUpdate(data, id)
         if (!update) return res.status(400).send({ message: 'Have submitted some data that cannot be updated or missing data' })
-        //Validar si tiene permisos (tokenización) X Hoy No lo vemos X
         //Actualizar (DB)
         let updatedUser = await User.findOneAndUpdate(
             { _id: id }, //ObjectsId <- hexadecimales (Hora sys, Version Mongo, Llave privada...)

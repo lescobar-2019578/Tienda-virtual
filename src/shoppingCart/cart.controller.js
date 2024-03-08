@@ -16,114 +16,153 @@ export const test = (req, res) => {
 
 export const create = async (req, res) => {
     try {
-        let { product, quantity } = req.body
-        let { completeShop } = req.body
-        let uid = req.user._id
+        const { product, quantity, buyComplete } = req.body 
+        const uid = req.user._id 
 
-        let productData = await Product.findById(product)
+        const productData = await Product.findById(product) 
         if (!productData || productData.stock === 0 || quantity > productData.stock) {
-            return res.status(400).send({ message: 'There is insufficient stock for this product.' })
+            return res.status(400).send({ message: 'There is insufficient stock for this product.' }) 
         }
 
-        if (!completeShop) {
-            let cart = await Cart.findOne({ user: uid })
+        if (!buyComplete) {
+            let cart = await Cart.findOne({ user: uid }) 
 
             if (!cart) {
-                if (!cart) {
-                    let newCart = new Cart({
-                        user: uid,
-                        products: [{ product: product, quantity }],
-                        total: 0  // Inicializamos el total en 0
-                    });
+                const newCart = new Cart({
+                    user: uid,
+                    products: [{ product: product, quantity }],
+                    total: 0
+                }) 
 
-                let total = 0;
+                let total = 0 
                 for (let item of newCart.products) {
-                    let productData = await Product.findById(item.product);
+                    let productData = await Product.findById(item.product) 
                     if (productData) {
-                        total += productData.price * item.quantity;
+                        total += productData.price * item.quantity 
                     }
                 }
-                newCart.total = total;
-                await newCart.save();
-            }}
-
-
-            // Miramos si el producto está en el carrito
-            let productIndex = cart.products.findIndex(p => p.product.equals(product)) 
-
-            if (productIndex !== -1) {
-                userCart.products[productIndex].quantity += parseInt(selectedQuantity) 
-            } else {
-                userCart.products.push({ product: selectedProduct, quantity: selectedQuantity }) 
+                newCart.total = total 
+                await newCart.save() 
+                return res.send({ message: 'Product added to cart successfully.', total }) 
             }
 
+            const productIndex = cart.products.findIndex(p => p.product.equals(product)) 
 
-            // Calculamos el total del carrito
-            userCart.total = calculateCartTotal(userCart.products) 
-            await saveCart(userCart) 
-
-            return res.send({ message: 'Product added to cart successfully.', total: userCart.total }) 
+            if (productIndex !== -1) {
+                cart.products[productIndex].quantity += parseInt(quantity) 
             } else {
-            if (isPurchaseComplete !== 'CONFIRM') return res.status(400).send({ message: `Validation word must be 'CONFIRM'.` }) 
+                cart.products.push({ product: product, quantity }) 
+            }
 
-            let userCart = await getCartByUserId(userId) 
+            let total = 0 
+            for (const item of cart.products) {
+                const productData = await Product.findById(item.product) 
+                if (productData) {
+                    total += productData.price * item.quantity 
+                }
+            }
+            cart.total = total 
+            await cart.save() 
 
-            if (!userCart) {
+            return res.send({ message: 'Product added to cart successfully.', total }) 
+        } else {
+            if (buyComplete !== 'CONFIRM') return res.status(400).send({ message: `Validation word must be 'CONFIRM'.` }) 
+
+            let cart = await Cart.findOne({ user: uid }) 
+
+            if (!cart) {
                 return res.status(400).send({ message: 'The cart is empty.' }) 
             }
 
-            // Crear un nuevo registro de factura con los datos del carrito de compras
-            const billItems = await prepareBillItems(userCart.products) 
-
-            const bill = createBill(userId, billItems, userCart.total) 
-            const savedBill = await saveBill(bill) 
-
-            await updateProductStock(userCart.products) 
-            await deleteCart(userCart._id) 
-
-            const pdfPath = await generateBillPDF(savedBill) 
-            console.log('PDF generated:', pdfPath) 
-
-            return res.status(200).send({ message: 'Purchase completed successfully and bill generated.', bill: savedBill }) 
+            let billItems = [] 
+            for (let item of cart.products) {
+                let productData = await Product.findById(item.product) 
+                if (productData) {
+                    billItems.push({
+                        product: item.product,
+                        quantity: item.quantity,
+                        unitPrice: productData.price, // Precio unitario del producto
+                        totalPrice: productData.price * item.quantity // Precio total del producto
+                    }) 
+                }
             }
 
-         } catch (error) {
-                console.error(error) 
-                return res.status(500).send({ message: 'Error processing purchase.', error: error }) 
+            let bill = new Bill({
+                user: cart.user,
+                items: billItems,
+                totalAmount: cart.total
+            }) 
+            let savedBill = await bill.save() 
+            
+            for (const item of cart.products) {
+                const productData = await Product.findById(item.product) 
+                if (productData) {
+                    productData.stock -= item.quantity 
+                    await productData.save() 
+                }
+            }
+            await Cart.deleteOne({ _id: cart._id }) 
+
+            let pdfPath = await generateBillPDF(savedBill) 
+            console.log('PDF generated:', pdfPath) 
+
+            return res.send({ message: 'Purchase completed successfully and bill generated.', bill: savedBill }) 
         }
+    } catch (error) {
+        console.error(error) 
+        return res.status(500).send({ message: 'Error processing purchase.', error: error }) 
+    }
 }
 
-export const billPDF = async (bill) => {
+
+
+export const generateBillPDF = async (bill) => {
     return new Promise((resolve, reject) => {
-        let doc = new PDFDocument() 
-        let __filename = fileURLToPath(import.meta.url) 
-        let currentDir = dirname(__filename) 
-        let billsDir = join(currentDir, '..', '..', 'bills') 
-        let pdfPath = join(billsDir, `InvoiceNo.${bill._id}.pdf`) 
+        try {
+            const doc = new PDF()  // Crear un nuevo documento PDF
+            const __filename = fileURLToPath(import.meta.url) 
+            const currentDir = dirname(__filename) 
+            const billsDir = join(currentDir, '..', 'bill')  // Directorio donde se guardarán las facturas
+            const pdfPath = join(billsDir, `InvoiceNo.${bill._id}.pdf`)  // Ruta del archivo PDF
 
-        let stream = doc.pipe(fs.createWriteStream(pdfPath)) 
+            // Asegúrate de que el directorio de facturas exista
+            if (!fs.existsSync(billsDir)) {
+                fs.mkdirSync(billsDir, { recursive: true }) 
+            }
 
-        doc.fontSize(20).text('Invoice', { align: 'center' }).moveDown() 
+            let stream = doc.pipe(fs.createWriteStream(pdfPath))  // Crear un flujo de escritura para el archivo PDF
 
-        doc.fontSize(12).text(`User: ${bill.user}`, { align: 'left' }) 
-        doc.text(`Date: ${bill.date}`, { align: 'left' }).moveDown() 
+            // Escribir el contenido de la factura en el documento PDF
+            doc.fontSize(20).text('Invoice', { align: 'center' }).moveDown() 
 
-        doc.text('Invoice Items:', { align: 'left' }).moveDown() 
+            doc.fontSize(12).text(`Bill ID: ${bill._id}`, { align: 'left' }) 
+            doc.fontSize(12).text(`User: ${bill.user}`, { align: 'left' }) 
+            doc.text(`Date: ${bill.date}`, { align: 'left' }).moveDown() 
 
-        for (let item of bill.items) {
-            doc.text(`- Product: ${item.product}, Quantity: ${item.quantity}, Unit Price: ${item.unitPrice}`, { align: 'left' }) 
+            doc.text('Invoice Items:', { align: 'left' }).moveDown() 
+
+            for (let item of bill.items) {
+                doc.text(`- Product: ${item.product} , 
+                            Quantity: ${item.quantity}, 
+                            Unite Price: ${item.unitPrice}`, 
+                            { align: 'left' })
+                             
+            }
+
+            doc.moveDown().text(`Total Amount: ${bill.totalAmount}`, { align: 'right' }) 
+
+            doc.end()  // Finalizar la escritura del documento PDF
+
+            stream.on('finish', () => {
+                console.log(`PDF generated at: ${pdfPath}`) 
+                resolve(pdfPath)  // Resolución de la promesa con la ruta del archivo PDF generado
+            }) 
+
+            stream.on('error', (err) => {
+                reject(err)  // Rechazo de la promesa en caso de error
+            }) 
+        } catch (error) {
+            reject(error)  // Captura de errores y rechazo de la promesa
         }
-
-        doc.moveDown().text(`Total: ${bill.totalAmount}`, { align: 'right' }) 
-
-        doc.end() 
-
-        stream.on('finish', () => {
-            resolve(pdfPath) 
-        }) 
-
-        stream.on('error', (err) => {
-            reject(err) 
-        }) 
     }) 
-} 
+}
