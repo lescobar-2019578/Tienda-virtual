@@ -19,18 +19,30 @@ export const getAllProducts = async (req, res) => {
   }
 }
 
-// Obtener un producto por su ID
-export const getProductById = async (req, res) => {
+// Obtener un producto por su Nombre
+export const searchProducts = async (req, res) => {
   try {
-    let product = await Product.findById(req.params.id) 
-    if (!product) {
-      return res.status(404).send({ error: 'Product not found' }) 
+    let { data } = req.query;
+
+    if (!data) {
+      return res.status(400).send({ message: 'Please provide a search data' });
     }
-    res.send(product) 
+
+    let allProducts = await Product.find().populate('category');
+    let searchResults = allProducts.filter(product =>
+      product.name.toLowerCase().includes(data.toLowerCase())
+    );
+
+    if (searchResults.length === 0) {
+      return res.status(404).send({ message: 'No products found' });
+    }
+
+    res.send(searchResults);
   } catch (error) {
-    res.status(500).send({ error: 'The product was not found' }) 
+    console.error(error);
+    res.status(500).send({ error: 'Error searching products' });
   }
-}
+};
 
 // Crear un nuevo producto
 export const createProduct = async (req, res) => {

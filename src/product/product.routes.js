@@ -3,7 +3,7 @@ import express from 'express'
 import {
     testProduct,
     getAllProducts,
-    getProductById,
+    searchProducts,
     createProduct,
     updateProduct,
     deleteProduct,
@@ -17,7 +17,7 @@ const api = express.Router()
 
 //Rutas publicas 
 api.get('/getAllProducts', getAllProducts)
-api.get('/getProduct/:id', getProductById)
+api.get('/searchProduct', searchProducts)
 
 // Rutas privadas protegidas por middleware (seccion de autentic)
 api.get( '/testProduct', [validateJwt],testProduct) //prueba de conexion al servidor

@@ -105,13 +105,12 @@ export const update = async (req, res) => { //Datos generales (No password)
         if (!update) return res.status(400).send({ message: 'Have submitted some data that cannot be updated or missing data' })
         //Actualizar (DB)
         let updatedUser = await User.findOneAndUpdate(
-            { _id: id }, //ObjectsId <- hexadecimales (Hora sys, Version Mongo, Llave privada...)
+            { _id: id }, 
             data, //Los datos que se van a actualizar
             { new: true } //Objeto de la DB ya actualizado
         )
         //Validar la actualización
         if (!updatedUser) return res.status(401).send({ message: 'User not found and not updated' })
-        //Respondo al usuario
         return res.send({ message: 'Updated user', updatedUser })
     } catch (err) {
         console.error(err)
